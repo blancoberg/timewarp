@@ -1,16 +1,14 @@
---require("blancoberg.Equations")
-
 local actualTimeScale = 1
 local actualTimeDiff = 1
 local equations = Equations
 
 TimeWarp = {}
 TimeWarp.__index = TimeWarp
-TimeWarp._tweens = {}												--		Table of active timers and tweens ( only used inside class )
+TimeWarp._tweens = {}						--		Table of active timers and tweens ( only used inside class )
 TimeWarp.timeScale = 1						--		change this variable to slow down / speed up project
 TimeWarp.frameRate = 60	
-TimeWarp.timePerFrame = 1/60											-- 		Define frameRate of the project
-TimeWarp.timeFactor = TimeWarp.timeScale							-- 	use this on enterFrame function that does +-*/ math on objects.
+TimeWarp.timePerFrame = 1/60				-- 		Define frameRate of the project
+TimeWarp.timeFactor = TimeWarp.timeScale	-- 		use this on enterFrame function that does +-*/ math on objects.
 TimeWarp.timer = {}
 TimeWarp.lastTime = system.getTimer()
 TimeWarp.actualTimeScale = 1
@@ -33,36 +31,6 @@ local _playing = 1
 local function table_insert(a,b,c)
 	
 	a[b] = c
-
-end
-
-local _strings = 
-{
-	frameBased = 0,
-	onMiddle = 1,
-	time = 2,
-	delay = 3,
-	transition = 4,
-	timer = 5,
-	onComplete = 6,
-	isPausable = 7,
-	onUpdate = 8,
-	onStart = 9,
-	pause = 10,
-	loop = 11,
-	currentTime = 12
-}
-
---[[
-
-faster way to compare strings
-
-]]
-
-local function _compareStrings(str1,str2)
-
-	return _strings[str1] == _strings[str2]
-	
 
 end
 
@@ -91,19 +59,18 @@ function TimeWarp.to(obj,params) -- displayobject, object, --- > returns type:tw
 	local startValues = {}
 	for k,v in pairs(params) do 
 		
-		--if( _compareStrings(k,"frameBased") ~= true and _compareStrings(k,"onMiddle") ~= true and _compareStrings(k,"time") ~= true and _compareStrings(k,"delay") ~= true and _compareStrings(k,"transition") ~= true and _compareStrings(k,"timer")~= true and _compareStrings(k,"onComplete")~=true and k ~= "isPausable" and k ~= "onUpdate" and k ~= "onStart" and k ~= "pause" and k ~= "loop" and k ~= "currentTime") then
-		if( k ~= "frameBased" and k ~= "onMiddle" and k ~= "time" and k~="delay" and k~= "transition" and k ~= "timer" and k ~= "onComplete" and k ~= "isPausable" and k ~= "onUpdate" and k ~= "onStart" and k ~= "pause" and k ~= "loop" and k ~= "currentTime") then
+		if( k ~= "frameBased" and k ~= "loop" and k ~= "onMiddle" and k ~= "time" and k~="delay" and k~= "transition" and k ~= "timer" and k ~= "onComplete" and k ~= "isPausable" and k ~= "onUpdate" and k ~= "onStart" and k ~= "pause" and k ~= "loop" and k ~= "currentTime") then
 			newParams[k] = v
 			startValues[k] = obj[k]
 		end
 	end
-	
+	params.startDelay = params.delay
 	params.currentTime = 0
 	params.obj = obj
 	local newTween = {parameters=newParams,settings=params,startValues=startValues}
 	newTween.startDelay = params.delay
 	
-
+	
 	table_insert(TimeWarp._tweens,#TimeWarp._tweens+1,newTween)
 	return newTween
 end
@@ -116,7 +83,7 @@ end
 
 function TimeWarp.cleanUpDoubles(tween)
 	
-	--print("TimeWarp.cleanDoubles",obj,params,tween2)
+	
 	local tweens = TimeWarp._tweens
 	
 	
@@ -138,10 +105,9 @@ function TimeWarp.cleanUpDoubles(tween)
 					if(k == a) then
 					
 						-- exists --
-						--print("clean tween parameter",k)
 						
 						parameters[k] = nil
-						--parameters[k] = nil
+						
 						
 					end
 				end
@@ -167,17 +133,14 @@ function TimeWarp.update()
 	TimeWarp.lastTime = system.getTimer()
 	
 	--if TimeWarp.deltaTime > 1000/TimeWarp.frameRate * 3  then TimeWarp.deltaTime = 1000/TimeWarp.frameRate * 3  end
-
---	if TimeWarp.deltaTime > 1000/60 * 3  then TimeWarp.deltaTime = 1000/60 * 3  end
-	--
-	
+	--if TimeWarp.deltaTime > 1000/60 * 3  then TimeWarp.deltaTime = 1000/60 * 3  end
 	--TimeWarp.deltaTime = 1000/60
+	
 	local timeScale = TimeWarp.timeScale
 	
 	if(TimeWarp.freeze ~= true) then
 	
 		TimeWarp.timeFactor = TimeWarp.timeScale
-		--print("timewarp.update")
 		local time = system.getTimer()
 		local tweens = TimeWarp._tweens
 		local timeDiff =  TimeWarp.deltaTime--1000/60
@@ -185,23 +148,9 @@ function TimeWarp.update()
 		--actualTimeDiff  = math.min(2,TimeWarp.deltaTime/(1000/TimeWarp.frameRate))* _playing
 		--actualTimeScale = math.min(2,timeScale * TimeWarp.deltaTime/(1000/TimeWarp.frameRate))  * _playing
 		
-		
 		actualTimeDiff  = TimeWarp.deltaTime/(1000/TimeWarp.frameRate)* _playing
 		actualTimeScale = timeScale * TimeWarp.deltaTime/(1000/TimeWarp.frameRate)  * _playing
 		
-		
-		--print("getTimeScale()",actualTimeScale)
-		
-		--print("DeltaTime",TimeWarp.deltaTime)
-		--print("PROCENT SPEED",TimeWarp.deltaTime/(1000/60))
-		--TimeWarp.frameRate
-	--	local timeDiff = 1000/60
-		--if TimeWarp.deltaTime > (1000/60)*2 then
-		--	TimeWarp.deltaTime = (1000/60)*2
-		--end
-		
-		
-		--local timeFrame = 1000/60
 		for i=#tweens,1,-1 do
 
 			local tween = tweens[i]
@@ -232,8 +181,7 @@ function TimeWarp.update()
 						settings.delay = settings.delay - timeDiff 
 					end
 					
-					--settings.delay = 4000
-					-- create new startValues--
+					
 
 					
 					
@@ -252,10 +200,10 @@ function TimeWarp.update()
 					
 					if settings.currentTime > time*0.5 and tween.halfWayThrough ~= true then
 						
-						--print("halfWay")
+						
 						tween.halfWayThrough = true
 						if settings.onMiddle ~= nil then
-							--settings.onMiddle(tweens[i].obj)
+							
 							table_insert(callbacks,#callbacks+1,{callback=settings.onMiddle,object=objectOfInterest})
 						end
 						
@@ -269,7 +217,7 @@ function TimeWarp.update()
 							settings.currentTime = 0
 							settings.currentTime = settings.currentTime  + math.abs(settings.delay)
 							TimeWarp.cleanUpDoubles(tween)
-							--TimeWarp.cleanUpDoubles(objectOfInterest,settings,tweens[i])
+							
 						end
 						
 						
@@ -285,9 +233,9 @@ function TimeWarp.update()
 						
 						
 						if settings.onStart ~= nil then
-							--settings.onStart(objectOfInterest)
-							--print("onStart")
+							
 							table_insert(callbacks,#callbacks+1,{callback=settings.onStart,object=objectOfInterest})
+							
 						end
 					end
 					
@@ -315,52 +263,17 @@ function TimeWarp.update()
 					-- loops through every variable that has been sent to the tween ex: x,y,alpha,rotation etc..
 					----------------------------------------------------------------------
 
-
-					--local procent = settings.currentTime/(time+settings.delay)		-- procent complete of tweens
-					
-					
 					for k,v in pairs(parameters) do 
 
-						--* @param t		Current time (in frames or seconds).
-						--* @param b		Starting value.
-					 	--* @param c		Change needed in value.
-						--* @param d		Expected easing duration (in frames or seconds).
-						--print("tween ",k,startValues[k])
-						--print ("parameter ",k,parameters[k],"startvalues",k,startValues[k])
-						
-						--local t = settings.currentTime
-						--local b = startValues[k]
-						--local c = parameters[k] - startValues[k]
-						--local d = time
-						
-						--local 
-						--local procent = (t)/d
-						--if procent >= 1 then
-						--if k == "scale" then
-							--print("tween procent",procent,k,"time")
-						--end
-							
-						--end
-						
-						
-						--objectOfInterest[k] = equations[settings.transition](settings.currentTime,startValues[k],parameters[k] - startValues[k],time)
-						
-						--time -- duration , start , difference
 						objectOfInterest[k] = settings.transition(settings.currentTime,time,startValues[k],parameters[k] - startValues[k])
-						
-						
-						--print(settings.transition)
-						--objectOfInterest[k] = equations.easeNone(settings.currentTime,startValues[k],parameters[k] - startValues[k],time)
-					--	print("tween ", k)
 					end
 
 					----------------------------------------------------------------------
 					-- end of calculations 
 					----------------------------------------------------------------------
-					--print("onUpdate",settings.onUpdate)
+					
 					if settings.onUpdate ~= nil then
-						--print("onUpdate")
-						--settings.onUpdate(objectOfInterest)
+						
 						table_insert(callbacks,#callbacks+1,{callback=settings.onUpdate,object=objectOfInterest})
 					end
 
@@ -378,10 +291,10 @@ function TimeWarp.update()
 								
 								if(settings.loop ~= 0) then
 
-									--print("timer loop")
+								
 									settings.loop = settings.loop - 1
 									settings.currentTime = 0
-									--print("timer loop")
+									
 								else
 
 									-- else remove tween from global table -- 
@@ -409,7 +322,6 @@ function TimeWarp.update()
 
 			end
 		end
-		--optimizer:endReg("timeWarp",#TimeWarp._tweens)
 		
 		
 		for i=1,#callbacks,1 do
@@ -418,8 +330,6 @@ function TimeWarp.update()
 	end
 	
 	
-	
-	--print("TimeWarps",#TimeWarp._tweens)
 end
 
 ----------------------------------------------------------------------
@@ -465,10 +375,9 @@ end
 
 function TimeWarp.removeTweens(obj,params)
 
-	--print("remove tweens",obj,#TimeWarp._tweens)
+	
 	for i=#TimeWarp._tweens,1,-1 do
 		
-		--print("  tween",TimeWarp._tweens[i].settings.obj)
 		if(TimeWarp._tweens[i].settings.obj == obj) then
 			if params == nil then
 				table.remove(TimeWarp._tweens,i)
@@ -480,7 +389,6 @@ function TimeWarp.removeTweens(obj,params)
 				
 			end
 			
-			--print("tween removed",i)
 		end
 		
 	end
@@ -557,15 +465,26 @@ end
 function TimeWarp.setTimeScale(time) -- 0<1 where 1 is normal 
 	
 	TimeWarp.timeScale = time
-	--TimeWarp._updatePhysics()
-	--physics.setTimeStep((1/TimeWarp.frameRate) * TimeWarp.timeScale)
-	--SoundManager._updatePitch()
-	if(time == 0) then
-		--physics.pause()
-	else
-		--physics.start()
+	
+end
+
+function TimeWarp.from(obj,params)
+	
+	local tween =  TimeWarp.to(obj,params)
+	local obj = tween.settings.obj
+	
+	for k,j in pairs(tween.parameters) do
+		
+		local target = obj[k]
+		local start = tween.parameters[k]
+		tween.parameters[k] = target
+		tween.startValues[k] = start
+		
+		
 	end
 	
+	return tween
+
 end
 
 ----------------------------------------------------------------------
@@ -576,7 +495,7 @@ end
 
 function TimeWarp.warpTo(v,time,d) -- v = 0<1, time in milliseconds
 
-	TimeWarp.to(TimeWarp,{timeScale=v,delay=d,time=time,onUpdate=TimeWarp._updatePhysics,onComplete=TimeWarp._warpComplete})
+	TimeWarp.to(TimeWarp,{timeScale=v,delay=d,time=time,onUpdate=TimeWarp._updatePhysics})
 	--physics.start()
 end
 
@@ -593,26 +512,6 @@ function TimeWarp._warpComplete()
 	
 	if(TimeWarp.timeScale == 0) then
 	
-		--physics.pause()
-	end
-end
-
-
-----------------------------------------------------
--- Completely freezes all timers and transitions ---
--- without causing any effects ---------------------
-----------------------------------------------------
-
-function TimeWarp.setFreeze(v)
-	TimeWarp.freeze = v
-	if(v == true) then
-		TimeWarp.timeScale = 0
-		TimeWarp.timeFactor = 0
-		--physics.pause()
-	else
-		TimeWarp.timeScale = 1
-		TimeWarp.timeFactor = 1
-		--physics.start()
 	end
 end
 
@@ -632,12 +531,7 @@ function TimeWarp.init(fps)
 	
 	TimeWarp.frameRate = fps
 	TimeWarp.timePerFrame = 1/fps
-	--transition.to = TimeWarp.to
-	--transition.cancel = TimeWarp.cancel
-	--transition.pause = TimeWarp.pause
-	--transition.resume = TimeWarp.resume
-	--TimeWarp.performWithDelay = TimeWarp.performWithDelay
-	--timer.cancel = TimeWarp.cancel
+	
 	if physics ~= nil then
 		physics.setTimeScale = TimeWarp.setTimeScale
 		physics.warpTo = TimeWarp.warpTo
@@ -661,8 +555,4 @@ function TimeWarp.debugPause(event)
 end
 
 TimeWarp.init(display.fps)
---Runtime:addEventListener("touch",TimeWarp.debugPause)
 
-  --physics.setTimeStep(1/50000)
-	--physics.setTimeScale(0.5)
---TimeWarp.to(platform,{time=1000,delay=0,timer=true,loop = true})
